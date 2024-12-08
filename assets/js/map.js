@@ -1,48 +1,93 @@
-// Wait until the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the map and set the default view
-    const map = L.map('map').setView([37.7749, -122.4194], 13); // Coordinates for San Francisco
-  
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-  
-    // Add a marker to the center of the map
-    const marker = L.marker([37.7749, -122.4194]).addTo(map)
-      .bindPopup('This is San Francisco!')
-      .openPopup();
-  
-    // Function to update location details
-    const updateLocationDetails = (lat, lng) => {
-      const locationDetails = document.getElementById('location-name');
-      locationDetails.textContent = `Lat: ${lat}, Lng: ${lng}`;
-    };
-  
-    // Add a click event to update marker and location details
-    map.on('click', (e) => {
-      const lat = e.latlng.lat.toFixed(4);
-      const lng = e.latlng.lng.toFixed(4);
-  
-      // Move the marker to the clicked location
-      marker.setLatLng([lat, lng]);
-  
-      // Update the location details
-      updateLocationDetails(lat, lng);
-    });
-  
-    // Zoom control buttons
-    const zoomInButton = document.getElementById('zoom-in');
-    const zoomOutButton = document.getElementById('zoom-out');
-  
-    // Zoom in functionality
-    zoomInButton.addEventListener('click', () => {
-      map.zoomIn();
-    });
-  
-    // Zoom out functionality
-    zoomOutButton.addEventListener('click', () => {
-      map.zoomOut();
-    });
+// Initialize the map
+const map = L.map('map').setView([0, 0], 13);
+
+// Add OpenStreetMap tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+}).addTo(map);
+
+// Add a marker for user interaction
+let marker;
+
+// Handle geolocation success
+function onLocationFound(e) {
+  const { latitude, longitude } = e;
+
+  // Center map and update marker
+  map.setView([latitude, longitude], 13);
+  if (marker) {
+    marker.setLatLng([latitude, longitude]);
+  } else {
+    marker = L.marker([latitude, longitude]).addTo(map).bindPopup('You are here!').openPopup();
+  }
+
+  // Update location details
+  document.getElementById('location-name').textContent = `Latitude: ${latitude.toFixed(4)}, Longitude: ${longitude.toFixed(4)}`;
+}
+
+// Handle geolocation error
+function onLocationError(error) {
+  console.error('Geolocation error:', error.message);
+  alert('Unable to retrieve your location. Please enable location services.');
+}
+
+// Attempt to locate the user
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    (position) => onLocationFound(position.coords),
+    onLocationError
+  );
+} else {
+  alert('Geolocation is not supported by your browser.');
+}
+
+// Zoom controls
+document.getElementById('zoom-in').addEventListener('click', () => map.zoomIn());
+document.getElementById('zoom-out').addEventListener('click', () => map.zoomOut());
+
+// Sidebar actions
+document.querySelectorAll('.list-group-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const action = item.getAttribute('data-action');
+
+    switch (action) {
+      case 'saved-places':
+        alert('Navigating to Saved Places...');
+        const savedCoordinates = [37.7749, -122.4194];
+        map.setView(savedCoordinates, 14);
+        marker.setLatLng(savedCoordinates).bindPopup('Saved Place: San Francisco').openPopup();
+        break;
+
+      case 'timeline':
+        alert('Opening Your Timeline...');
+        break;
+
+      case 'directions':
+        alert('Getting Directions...');
+        break;
+
+      default:
+        console.log('No action defined for this item.');
+    }
   });
-  
+});
+
+// Add event listener for directions
+document.querySelector('[data-action="directions"]').addEventListener('click', () => {
+  const directionsModal = new bootstrap.Modal(document.getElementById('directionsModal'));
+  directionsModal.show();
+});
+
+// Handle directions form submission
+document.getElementById('getDirections').addEventListener('click', () => {
+  const startLocation = document.getElementById('startLocation').value;
+  const endLocation = document.getElementById('endLocation').value;
+
+  if (startLocation && endLocation) {
+    alert(`Fetching directions from ${startLocation} to ${endLocation}...`);
+    // Placeholder for directions logic
+    console.log(`Start: ${startLocation}, End: ${endLocation}`);
+  } else {
+    alert('Please enter both start and end locations.');
+  }
+});

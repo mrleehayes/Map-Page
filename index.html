@@ -13,7 +13,27 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="assets/css/styles.css">
-
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .zoom-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+    .location-details {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
   <!-- Header -->
@@ -38,17 +58,15 @@
       <!-- Sidebar -->
       <nav class="col-12 col-md-3 sidebar d-md-block d-none">
         <ul class="list-group list-group-flush">
-          <li class="list-group-item">Saved Places</li>
-          <li class="list-group-item">Your Timeline</li>
-          <li class="list-group-item">Directions</li>
+          <li class="list-group-item" data-action="saved-places">Saved Places</li>
+          <li class="list-group-item" data-action="timeline">Your Timeline</li>
+          <li class="list-group-item" data-action="directions">Directions</li>
         </ul>
-      </nav>
+      </nav>      
 
       <!-- Map Section -->
       <main class="col-12 col-md-9 p-0 position-relative">
-        <div id="map">
-          <!-- Leaflet.js map will render here -->
-        </div>
+        <div id="map"></div>
         <!-- Zoom Controls -->
         <div class="zoom-controls btn-group-vertical">
           <button id="zoom-in" class="btn btn-secondary">+</button>
@@ -60,6 +78,31 @@
           <p id="location-name">Select a location</p>
         </div>
       </main>
+    </div>
+  </div>
+
+  <!-- Directions Modal -->
+  <div class="modal fade" id="directionsModal" tabindex="-1" aria-labelledby="directionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="directionsModalLabel">Get Directions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="directionsForm">
+            <div class="mb-3">
+              <label for="startLocation" class="form-label">Start Location</label>
+              <input type="text" class="form-control" id="startLocation" placeholder="Enter start location">
+            </div>
+            <div class="mb-3">
+              <label for="endLocation" class="form-label">End Location</label>
+              <input type="text" class="form-control" id="endLocation" placeholder="Enter destination">
+            </div>
+            <button type="button" class="btn btn-primary" id="getDirections">Get Directions</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
